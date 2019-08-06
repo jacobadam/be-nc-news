@@ -21,6 +21,16 @@ describe("the api router --> /api", () => {
         .expect(200)
         .then(({ body }) => {
           expect(body.topics).to.be.an("array");
+          expect(body.topics[0]).to.be.an("object");
+          expect(body.topics[0]).to.contain.keys("slug", "description");
+        });
+    });
+    it("(1i) ERROR / 404 produces route not found", () => {
+      return request(app)
+        .get("/api/notfound")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("route not found");
         });
     });
   });
