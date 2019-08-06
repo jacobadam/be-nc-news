@@ -25,18 +25,6 @@ describe("the api router --> /api", () => {
           expect(body.topics[0]).to.contain.keys("slug", "description");
         });
     });
-    it("(1b) GET ALL / STATUS CODE 200 - returns the actual response in an object", () => {
-      return request(app)
-        .get("/api/topics")
-        .expect(200)
-        .then(({ body }) => {
-          expect(body.topics).to.eql([
-            { slug: "mitch", description: "The man, the Mitch, the legend" },
-            { slug: "cats", description: "Not dogs" },
-            { slug: "paper", description: "what books are made of" }
-          ]);
-        });
-    });
     it("(1i) ERROR / 404 produces route not found", () => {
       return request(app)
         .get("/api/notfound")
@@ -61,12 +49,53 @@ describe("the api router --> /api", () => {
           );
         });
     });
-    // it("(2i) ERROR / 400 produces ", () => {
-    //   return request(app)
-    //     .get("/api/users/1")
-    //     .then(({ body }) => {
-    //       expect(body.msg).to.equal("route not found");
-    //     });
-    // });
+    it("(2i) ERROR / 404 produces an error message not found ", () => {
+      return request(app)
+        .get("/api/user/routenotfound")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("route not found");
+        });
+    });
+    it("(2ii) ERROR / 404 produces an error message for username not found", () => {
+      return request(app)
+        .get("/api/users/invalid-user-name")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("username not found");
+        });
+    });
   });
+  describe("the article router / articles", () => {
+    it("(3a) GET ALL / STATUS CODE 200 / checks if there is an array of article objects", () => {
+      return request(app)
+        .get("/api/articles/1")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles).to.be.an("array");
+          expect(body.articles[0]).to.be.an("object");
+          expect(body.articles[0]).to.contain.keys("title", "votes", "body");
+        });
+    });
+    //   it("(3b) GET ALL / STATUS CODE 200 / adds a new comment_count key that shows the total count of comments against this article id", () => {
+    //     return request(app)
+    //       .get("/api/articles/1")
+    //       .expect(200)
+    //       .then(({ body }) => {
+    //         expect(body.articles[0]).to.eql([
+    //           {
+    //             article_id: 1,
+    //             title: "Living in the shadow of a great man",
+    //             body: "I find this existence challenging",
+    //             votes: 100,
+    //             topic: "mitch",
+    //             author: "butter_bridge",
+    //             created_at: "2018-11-15T12:21:54.171Z",
+    //             comment_count: 1
+    //           }
+    //         ]);
+    //       });
+    //   });
+  });
+  it('')
 });

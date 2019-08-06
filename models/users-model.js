@@ -6,6 +6,10 @@ exports.viewAllUserObjects = ({ username }) => {
     .select("*")
     .from("users")
     .then(response => {
-      return response;
+      if (!response.length) {
+        return Promise.reject({ status: 404, msg: "username not found" });
+      } else {
+        return response;
+      }
     });
 };
