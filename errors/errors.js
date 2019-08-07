@@ -5,9 +5,15 @@ exports.handleCustomErrors = (err, req, res, next) => {
     next(err);
   }
 };
-exports.handlePsqlErrors = () => {};
+exports.handlePsqlErrors = (err, req, res, next) => {
+  if (err.code === "22P02") {
+    res.status(400).send({ msg: "username not found" });
+  } else {
+    next(err);
+  }
+};
 
 exports.handleServerErrors = (err, req, res, next) => {
   res.status(500).send({ msg: "internal server error" });
-  console.log(err, '500 err')
+  console.log(err, "500 err");
 };

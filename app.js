@@ -17,9 +17,7 @@ app.all("/*", (req, res, next) => {
 });
 
 app.use(handleCustomErrors);
-
 app.use(handlePsqlErrors);
-
 app.use(handleServerErrors);
 
 module.exports = app;
