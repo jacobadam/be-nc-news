@@ -16,3 +16,17 @@ exports.viewAllArticleObjects = ({ article_id }) => {
       }
     });
 };
+
+exports.updateArticleVote = (article_id, parameter, value) => {
+  return connection("articles")
+    .where("article_id", "=", article_id)
+    .increment(parameter, value)
+    .returning("*")
+    .then(response => {
+      if (!response.length) {
+        return Promise.reject({ status: 404, msg: "username not found" });
+      } else {
+        return response;
+      }
+    });
+};

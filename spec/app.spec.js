@@ -25,7 +25,7 @@ describe("the api router --> /api", () => {
           expect(body.topics[0]).to.contain.keys("slug", "description");
         });
     });
-    it("(1i) ERROR / 404 - produces route not found", () => {
+    it("(1i) ERROR / 404 - produces an error for bad route, not found", () => {
       return request(app)
         .get("/api/notfound")
         .expect(404)
@@ -49,7 +49,7 @@ describe("the api router --> /api", () => {
           );
         });
     });
-    it("(2i) ERROR / 404 - produces an error message not found ", () => {
+    it("(2i) ERROR / 404 - produces an error for bad route, not found", () => {
       return request(app)
         .get("/api/user/routenotfound")
         .expect(404)
@@ -57,7 +57,7 @@ describe("the api router --> /api", () => {
           expect(body.msg).to.equal("route not found");
         });
     });
-    it("(2ii) ERROR / 404 - produces an error message for username not found", () => {
+    it("(2ii) ERROR / 404 - produces an error as no username, not found", () => {
       return request(app)
         .get("/api/users/invalid-user-name")
         .expect(404)
@@ -101,7 +101,7 @@ describe("the api router --> /api", () => {
           ]);
         });
     });
-    it("(3i) ERROR / 404 - produces an error user not found", () => {
+    it("(3i) ERROR / 404 - produces an error as no username, not found", () => {
       return request(app)
         .get("/api/articles/300")
         .expect(404)
@@ -109,7 +109,7 @@ describe("the api router --> /api", () => {
           expect(body.msg).to.equal("username not found");
         });
     });
-    it("(3ii) ERROR / 400 - produces an error for a bad request", () => {
+    it("(3ii) ERROR / 400 - produces an error as username in wrong format, bad request", () => {
       return request(app)
         .get("/api/articles/name")
         .expect(400)
@@ -120,13 +120,52 @@ describe("the api router --> /api", () => {
     it("(4a) PATCH / STATUS 201 - adds a key value inc_votes which will have the property indicating how much the votes should be updated by", () => {
       return request(app)
         .patch("/api/articles/1")
-        .send({ parameter: "inc_vote", value: 10 })
+        .send({ parameter: "votes", value: 10 })
         .expect(201)
         .then(({ body }) => {
-          expect(body.article).to.be.an("object");
+          expect(body.articles[0]).to.be.an("object");
+        });
+    });
+    it("(4b) PATCH / STATUS 201 - adds a value of 10 to the current vote count", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send({ parameter: "votes", value: 10 })
+        .expect(201)
+        .then(({ body }) => {
+          expect(body.articles[0].votes).to.equal(110);
+        });
+    });
+    it("(4i) ERROR / STATUS 404 - produces an error as no username, not found", () => {
+      return request(app)
+        .patch("/api/articles/1000")
+        .send({ parameter: "votes", value: 10 })
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("username not found");
+        });
+    });
+    it("(4ii) ERROR / STATUS 400 - produces an error as username in wrong format, bad request", () => {
+      return request(app)
+        .patch("/api/articles/badrequest")
+        .send({ parameter: "votes", value: 10 })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("username not found");
+        });
+    });
+    it("(4iii) ERROR / STATUS 400 - produces an error as key is missing, bad request ", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send({ value: 10 })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("bad request - key is missing");
         });
     });
   });
 });
+
+
+//do I need a bad path error for each test - api/article instead of api/articles
 
 //install npm i chaisorted
