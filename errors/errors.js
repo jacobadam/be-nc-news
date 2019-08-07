@@ -6,10 +6,8 @@ exports.handleCustomErrors = (err, req, res, next) => {
   }
 };
 exports.handlePsqlErrors = (err, req, res, next) => {
-  if (err.code === "22P02") {
-    res.status(400).send({ msg: "username not found" });
-  } else if (err.code === "42703") {
-    res.status(400).send({ msg: "bad request - key is missing" });
+  if ("42703" || "22P02" || "23503") {
+    res.status(400).send({ msg: "bad request" });
   } else {
     next(err);
   }

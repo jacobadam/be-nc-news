@@ -114,43 +114,43 @@ describe("the api router --> /api", () => {
         .get("/api/articles/name")
         .expect(400)
         .then(({ body }) => {
-          expect(body.msg).to.equal("username not found");
+          expect(body.msg).to.equal("bad request");
         });
     });
-    it("(4a) PATCH / STATUS 201 - adds a key value inc_votes which will have the property indicating how much the votes should be updated by", () => {
+    it("(4a) PATCH / STATUS 200 - adds a key value inc_votes which will have the property indicating how much the votes should be updated by", () => {
       return request(app)
         .patch("/api/articles/1")
         .send({ parameter: "votes", value: 10 })
-        .expect(201)
+        .expect(200)
         .then(({ body }) => {
           expect(body.articles[0]).to.be.an("object");
         });
     });
-    it("(4b) PATCH / STATUS 201 - adds a value of 10 to the current vote count", () => {
+    it("(4b) PATCH / STATUS 200 - adds a value of 10 to the current vote count", () => {
       return request(app)
         .patch("/api/articles/1")
         .send({ parameter: "votes", value: 10 })
-        .expect(201)
+        .expect(200)
         .then(({ body }) => {
           expect(body.articles[0].votes).to.equal(110);
         });
     });
-    it("(4i) ERROR / STATUS 404 - produces an error as no username, not found", () => {
+    it("(4i) ERROR / STATUS 404 - produces an error as no article, not found", () => {
       return request(app)
         .patch("/api/articles/1000")
         .send({ parameter: "votes", value: 10 })
         .expect(404)
         .then(({ body }) => {
-          expect(body.msg).to.equal("username not found");
+          expect(body.msg).to.equal("article not found");
         });
     });
-    it("(4ii) ERROR / STATUS 400 - produces an error as username in wrong format, bad request", () => {
+    it("(4ii) ERROR / STATUS 400 - produces an error as article in wrong format, bad request", () => {
       return request(app)
         .patch("/api/articles/badrequest")
         .send({ parameter: "votes", value: 10 })
         .expect(400)
         .then(({ body }) => {
-          expect(body.msg).to.equal("username not found");
+          expect(body.msg).to.equal("bad request");
         });
     });
     it("(4iii) ERROR / STATUS 400 - produces an error as key is missing, bad request ", () => {
@@ -159,12 +159,112 @@ describe("the api router --> /api", () => {
         .send({ value: 10 })
         .expect(400)
         .then(({ body }) => {
-          expect(body.msg).to.equal("bad request - key is missing");
+          expect(body.msg).to.equal("bad request");
+        });
+    });
+    it("(4iv) ERROR / STATUS 400 - produces an error as property is missing - bad request", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send({ parmater: "", value: 10 })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("bad request");
+        });
+    });
+    it("(5a) POST / STATUS 200 - expect to return an object", () => {
+      return request(app)
+        .post("/api/articles/1/comments")
+        .send({
+          username: "rogersop",
+          body:
+            "We all love Mitch and his wonderful, unique typing style. However, the volume of his typing has ALLEGEDLY burst another students eardrums, and they are now suing for damages"
+        })
+        .expect(201)
+        .then(res => {
+          expect(res.body.comment[0]).to.be.an("object");
+        });
+    });
+    it("(5b) POST / STATUS 200 - posts an object containing key values; username and body", () => {
+      return request(app)
+        .post("/api/articles/1/comments")
+        .send({
+          username: "rogersop",
+          body:
+            "We all love Mitch and his wonderful, unique typing style. However, the volume of his typing has ALLEGEDLY burst another students eardrums, and they are now suing for damages"
+        })
+        .expect(201)
+        .then(({ body }) => {
+          expect(body.comment[0]).to.contain.keys("author", "body");
+        });
+    });
+    it("(5i) ERROR / STATUS 400 - produces an error as property is missing, bad request", () => {
+      return request(app)
+        .post("/api/articles/1/comments")
+        .send({
+          username: "",
+          body:
+            "We all love Mitch and his wonderful, unique typing style. However, the volume of his typing has ALLEGEDLY burst another students eardrums, and they are now suing for damages"
+        })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("bad request");
+        });
+    });
+    it("(5ii) ERROR / STATUS 404 - produces an error as key is missing, bad request", () => {
+      return request(app)
+        .post("/api/articles/1/comments")
+        .send({
+          body:
+            "We all love Mitch and his wonderful, unique typing style. However, the volume of his typing has ALLEGEDLY burst another students eardrums, and they are now suing for damages"
+        })
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("username not found");
+        });
+    });
+    it("(5iii) ERROR / STATUS 400 - produces an error as value entered in incorrect format, bad request", () => {
+      return request(app)
+        .post("/api/articles/1/comments")
+        .send({
+          username: 1,
+          body:
+            "We all love Mitch and his wonderful, unique typing style. However, the volume of his typing has ALLEGEDLY burst another students eardrums, and they are now suing for damages"
+        })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("bad request");
+        });
+    });
+    it("(5iv) ERROR / STATUS 404 - produces an error as article id does not exist, not found ", () => {
+      return request(app)
+        .post("/api/articles/1000/comments")
+        .send({ username: "jacob", body: "I am queens BLVD" })
+        .expect(404)
+        .then(({ body }) => {
+          console.log(body);
+          expect(body.msg).to.equal("not found");
+        });
+      // NEED TO COMPLETE
+    });
+    it("(5v) ERROR / STATUS 404 - produces an error as article id entered in incorrect format, bad request ", () => {
+      return request(app)
+        .post("/api/articles/hello/comments")
+        .send({ username: "jacob", body: "I am queens BLVD" })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("bad request");
+        });
+    });
+    it.only("6(a) GET / STATUS 200 - checks if there is an array of comments", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles[0]).to.be.an("array");
         });
     });
   });
 });
-
 
 //do I need a bad path error for each test - api/article instead of api/articles
 

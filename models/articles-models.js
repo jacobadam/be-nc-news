@@ -24,6 +24,19 @@ exports.updateArticleVote = (article_id, parameter, value) => {
     .returning("*")
     .then(response => {
       if (!response.length) {
+        return Promise.reject({ status: 404, msg: "article not found" });
+      } else {
+        return response;
+      }
+    });
+};
+
+exports.insertComment = (article_id, username, body) => {
+  return connection("comments")
+    .insert(article_id, username, body)
+    .returning("*")
+    .then(response => {
+      if (response[0].author === null) {
         return Promise.reject({ status: 404, msg: "username not found" });
       } else {
         return response;
