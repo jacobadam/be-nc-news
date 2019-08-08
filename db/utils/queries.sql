@@ -1,7 +1,9 @@
 \c nc_news_test;
 
 
-SELECT author AS username, body FROM comments;
+SELECT comment_id, votes, created_at, author AS username, body FROM comments;
+
+-- psql -f db/utils/queries.sql > output.txt
 
 -- SELECT articles.*, COUNT(comment_id) AS comment_count FROM articles
 -- LEFT JOIN comments ON articles.article_id = comments.article_id

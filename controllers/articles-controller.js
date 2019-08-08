@@ -1,7 +1,9 @@
 const {
   viewAllArticleObjects,
   updateArticleVote,
-  insertComment
+  insertComment,
+  viewAllCommentsById,
+  viewAllArticles
 } = require("../models/articles-models");
 
 exports.getAllArticleObjects = (req, res, next) => {
@@ -28,6 +30,24 @@ exports.postComment = (req, res, next) => {
   insertComment({ article_id, author: username, body: body })
     .then(comment => {
       res.status(201).send({ comment });
+    })
+    .catch(next);
+};
+
+exports.getCommentsById = (req, res, next) => {
+  const { article_id } = req.params;
+  viewAllCommentsById(article_id, req.query)
+    .then(comments => {
+      res.status(200).send({ comments });
+    })
+    .catch(next);
+};
+
+exports.getAllArticles = (req, res, next) => {
+  viewAllArticles(req.query)
+    .then(articles => {
+      console.log(articles, '<--articles in controller')
+      res.status(200).send({ articles });
     })
     .catch(next);
 };

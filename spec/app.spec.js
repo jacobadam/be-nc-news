@@ -1,9 +1,11 @@
 process.env.NODE_ENV = "test";
 const app = require("../app");
 const request = require("supertest");
+const connection = require("../db/connection");
 const chai = require("chai");
 const { expect } = chai;
-const connection = require("../db/connection");
+const chaiSorted = require("chai-sorted");
+chai.use(chaiSorted);
 
 describe("the api router --> /api", () => {
   beforeEach("app", () => {
@@ -14,6 +16,7 @@ describe("the api router --> /api", () => {
     return connection.destroy();
     //stops connection to the DB
   });
+  //SORT BY GET/POST/PATCH/DELETE
   describe("the topics router / topics", () => {
     it("(1a) GET ALL / STATUS CODE 200 - checks if there is an array of topic objects", () => {
       return request(app)
@@ -219,7 +222,7 @@ describe("the api router --> /api", () => {
         })
         .expect(404)
         .then(({ body }) => {
-          expect(body.msg).to.equal("username not found");
+          expect(body.msg).to.equal("article not found");
         });
     });
     it("(5iii) ERROR / STATUS 400 - produces an error as value entered in incorrect format, bad request", () => {
@@ -246,7 +249,7 @@ describe("the api router --> /api", () => {
         });
       // NEED TO COMPLETE
     });
-    it("(5v) ERROR / STATUS 404 - produces an error as article id entered in incorrect format, bad request ", () => {
+    it("(5v) ERROR / STATUS 400 - produces an error as article id entered in incorrect format, bad request ", () => {
       return request(app)
         .post("/api/articles/hello/comments")
         .send({ username: "jacob", body: "I am queens BLVD" })
@@ -255,17 +258,109 @@ describe("the api router --> /api", () => {
           expect(body.msg).to.equal("bad request");
         });
     });
-    it.only("6(a) GET / STATUS 200 - checks if there is an array of comments", () => {
+    it("(6a) GET / STATUS 200 - checks if there is an array of comments containing an object with specific key values", () => {
       return request(app)
         .get("/api/articles/1/comments")
         .expect(200)
         .then(({ body }) => {
-          expect(body.articles[0]).to.be.an("array");
+          expect(body.comments).to.be.an("array");
+          expect(body.comments[0]).to.be.an("object");
+          expect(body.comments[0]).to.contain.keys(
+            "comment_id",
+            "article_id",
+            "author"
+          );
+        });
+    });
+    it("(6b) GET / STATUS 200 - adds a sort_by query which sorts created_at", () => {
+      return request(app)
+        .get("/api/articles/1/comments?sort_by=created_at")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comments).to.be.descendingBy("created_at");
+        });
+    });
+    it("(6c) GET / STATUS 200 - adds a sort_by query which sorts comments by any valid column", () => {
+      return request(app)
+        .get("/api/articles/1/comments?sort_by=votes")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comments).to.be.descendingBy("votes");
+        });
+    });
+    it("(6d) GET / STATUS 200 - adds an order query which allows columns to be sorted ascendingly or descendingly", () => {
+      return request(app)
+        .get("/api/articles/1/comments?order=asc")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comments).to.be.sortedBy("created_at", {
+            ascending: true
+          });
+        });
+    });
+    it("(6e) GET / STATUS 200 - query order defaults to descending", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comments).to.be.descendingBy("created_at", {
+            descending: true
+          });
+        });
+    });
+    it("(6i) ERROR / STATUS 404 - produces an error as article id does not exist, not found", () => {
+      return request(app)
+        .get("/api/articles/1000/comments")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("article not found");
+        });
+    });
+    it("(6ii) ERROR / STATUS 400 - produces an error as article_id is in wrong format, bad request", () => {
+      return request(app)
+        .get("/api/articles/wrong/comments")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("bad request");
+        });
+    });
+    it("(6iii) ERROR / STATUS 400 - produces an error as sort_by column does not exist, bad request", () => {
+      return request(app)
+        .get("/api/articles/1/comments?sort_by=hello")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("bad request");
+        });
+    });
+    it("(6iv) ERROR / STATUS 400 - produces an error as order value is incorrect, bad request", () => {
+      return request(app)
+        .get("/api/articles/1/comments?order=hello")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.msg).to.equal("bad request");
+        });
+      //NEED TO FIX
+    });
+    it("(7a) GET / STATUS 200 / checks if there is an array of comments containing an object with specific key values", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles).to.be.an("array");
+          expect(body.articles[0]).to.be.an("object");
+        });
+    });
+    it("(7b) GET / STATUS 200 / adds a sort_by query which sorts comments by any valid column", () => {
+      return request(app)
+        .get("/api/articles?sort_by=topic")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles).to.be.descendingBy("topic");
         });
     });
   });
 });
 
 //do I need a bad path error for each test - api/article instead of api/articles
-
-//install npm i chaisorted
+//different test for is it an object/array/key values
+//help with the author/topic query
