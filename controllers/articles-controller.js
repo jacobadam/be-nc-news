@@ -46,7 +46,6 @@ exports.getCommentsById = (req, res, next) => {
 exports.getAllArticles = (req, res, next) => {
   viewAllArticles(req.query)
     .then(articles => {
-      console.log(articles, '<--articles in controller')
       res.status(200).send({ articles });
     })
     .catch(next);

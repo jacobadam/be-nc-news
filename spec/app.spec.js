@@ -18,161 +18,169 @@ describe("the api router --> /api", () => {
   });
   //SORT BY GET/POST/PATCH/DELETE
   describe("the topics router / topics", () => {
-    it("(1a) GET ALL / STATUS CODE 200 - checks if there is an array of topic objects", () => {
-      return request(app)
-        .get("/api/topics")
-        .expect(200)
-        .then(({ body }) => {
-          expect(body.topics).to.be.an("array");
-          expect(body.topics[0]).to.be.an("object");
-          expect(body.topics[0]).to.contain.keys("slug", "description");
-        });
-    });
-    it("(1i) ERROR / 404 - produces an error for bad route, not found", () => {
-      return request(app)
-        .get("/api/notfound")
-        .expect(404)
-        .then(({ body }) => {
-          expect(body.msg).to.equal("route not found");
-        });
+    describe("GET ALL - /TOPICS", () => {
+      it("(1a) GET ALL / STATUS CODE 200 - checks if there is an array of topic objects", () => {
+        return request(app)
+          .get("/api/topics")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.topics).to.be.an("array");
+            expect(body.topics[0]).to.be.an("object");
+            expect(body.topics[0]).to.contain.keys("slug", "description");
+          });
+      });
+      it("(1i) ERROR / 404 - produces an error for bad route, not found", () => {
+        return request(app)
+          .get("/api/notfound")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("route not found");
+          });
+      });
     });
   });
   describe("the users router / users", () => {
-    it("(2a) GET ALL / STATUS CODE 200 - checks if there is an array of topic objects", () => {
-      return request(app)
-        .get("/api/users/rogersop")
-        .expect(200)
-        .then(({ body }) => {
-          expect(body.users).to.be.an("array");
-          expect(body.users[0]).to.be.an("object");
-          expect(body.users[0]).to.contain.keys(
-            "username",
-            "name",
-            "avatar_url"
-          );
-        });
-    });
-    it("(2i) ERROR / 404 - produces an error for bad route, not found", () => {
-      return request(app)
-        .get("/api/user/routenotfound")
-        .expect(404)
-        .then(({ body }) => {
-          expect(body.msg).to.equal("route not found");
-        });
-    });
-    it("(2ii) ERROR / 404 - produces an error as no username, not found", () => {
-      return request(app)
-        .get("/api/users/invalid-user-name")
-        .expect(404)
-        .then(({ body }) => {
-          expect(body.msg).to.equal("username not found");
-        });
+    describe("GET ALL - /USERS/:USERNAME", () => {
+      it("(2a) GET ALL / STATUS CODE 200 - checks if there is an array of topic objects", () => {
+        return request(app)
+          .get("/api/users/rogersop")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.users).to.be.an("array");
+            expect(body.users[0]).to.be.an("object");
+            expect(body.users[0]).to.contain.keys(
+              "username",
+              "name",
+              "avatar_url"
+            );
+          });
+      });
+      it("(2i) ERROR / 404 - produces an error for bad route, not found", () => {
+        return request(app)
+          .get("/api/user/routenotfound")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("route not found");
+          });
+      });
+      it("(2ii) ERROR / 404 - produces an error as no username, not found", () => {
+        return request(app)
+          .get("/api/users/invalid-user-name")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("username not found");
+          });
+      });
     });
   });
   describe("the article router / articles", () => {
-    it("(3a) GET ALL / STATUS CODE 200 - checks if there is an array of article objects", () => {
-      return request(app)
-        .get("/api/articles/1")
-        .expect(200)
-        .then(({ body }) => {
-          expect(body.articles).to.be.an("array");
-          expect(body.articles[0]).to.be.an("object");
-          expect(body.articles[0]).to.contain.keys("title", "votes", "body");
-        });
-    });
-    it("(3b) GET ALL / STATUS CODE 200 - adds a new comment_count key that shows the total count of comments against this article id", () => {
-      return request(app)
-        .get("/api/articles/1")
-        .expect(200)
-        .then(({ body }) => {
-          const array = body.articles;
-          parsedComment = array.map(comment => {
-            comment.comment_count = Number(comment.comment_count);
-            return comment;
+    describe("GET ALL - /ARTICLES/:ARTICLE-ID", () => {
+      it("(3a) GET ALL / STATUS CODE 200 - checks if there is an array of article objects", () => {
+        return request(app)
+          .get("/api/articles/1")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).to.be.an("array");
+            expect(body.articles[0]).to.be.an("object");
+            expect(body.articles[0]).to.contain.keys("title", "votes", "body");
           });
-          expect(parsedComment).to.eql([
-            {
-              article_id: 1,
-              title: "Living in the shadow of a great man",
-              body: "I find this existence challenging",
-              votes: 100,
-              topic: "mitch",
-              author: "butter_bridge",
-              created_at: "2018-11-15T12:21:54.171Z",
-              comment_count: 13
-            }
-          ]);
-        });
+      });
+      it("(3b) GET ALL / STATUS CODE 200 - adds a new comment_count key that shows the total count of comments against this article id", () => {
+        return request(app)
+          .get("/api/articles/1")
+          .expect(200)
+          .then(({ body }) => {
+            const array = body.articles;
+            parsedComment = array.map(comment => {
+              comment.comment_count = Number(comment.comment_count);
+              return comment;
+            });
+            expect(parsedComment).to.eql([
+              {
+                article_id: 1,
+                title: "Living in the shadow of a great man",
+                body: "I find this existence challenging",
+                votes: 100,
+                topic: "mitch",
+                author: "butter_bridge",
+                created_at: "2018-11-15T12:21:54.171Z",
+                comment_count: 13
+              }
+            ]);
+          });
+      });
+      it("(3i) ERROR / 404 - produces an error as no article found, not found", () => {
+        return request(app)
+          .get("/api/articles/300")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("article not found");
+          });
+      });
+      it("(3ii) ERROR / 400 - produces an error as article id in wrong format, bad request", () => {
+        return request(app)
+          .get("/api/articles/name")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("bad request");
+          });
+      });
     });
-    it("(3i) ERROR / 404 - produces an error as no username, not found", () => {
-      return request(app)
-        .get("/api/articles/300")
-        .expect(404)
-        .then(({ body }) => {
-          expect(body.msg).to.equal("username not found");
-        });
-    });
-    it("(3ii) ERROR / 400 - produces an error as username in wrong format, bad request", () => {
-      return request(app)
-        .get("/api/articles/name")
-        .expect(400)
-        .then(({ body }) => {
-          expect(body.msg).to.equal("bad request");
-        });
-    });
-    it("(4a) PATCH / STATUS 200 - adds a key value inc_votes which will have the property indicating how much the votes should be updated by", () => {
-      return request(app)
-        .patch("/api/articles/1")
-        .send({ parameter: "votes", value: 10 })
-        .expect(200)
-        .then(({ body }) => {
-          expect(body.articles[0]).to.be.an("object");
-        });
-    });
-    it("(4b) PATCH / STATUS 200 - adds a value of 10 to the current vote count", () => {
-      return request(app)
-        .patch("/api/articles/1")
-        .send({ parameter: "votes", value: 10 })
-        .expect(200)
-        .then(({ body }) => {
-          expect(body.articles[0].votes).to.equal(110);
-        });
-    });
-    it("(4i) ERROR / STATUS 404 - produces an error as no article, not found", () => {
-      return request(app)
-        .patch("/api/articles/1000")
-        .send({ parameter: "votes", value: 10 })
-        .expect(404)
-        .then(({ body }) => {
-          expect(body.msg).to.equal("article not found");
-        });
-    });
-    it("(4ii) ERROR / STATUS 400 - produces an error as article in wrong format, bad request", () => {
-      return request(app)
-        .patch("/api/articles/badrequest")
-        .send({ parameter: "votes", value: 10 })
-        .expect(400)
-        .then(({ body }) => {
-          expect(body.msg).to.equal("bad request");
-        });
-    });
-    it("(4iii) ERROR / STATUS 400 - produces an error as key is missing, bad request ", () => {
-      return request(app)
-        .patch("/api/articles/1")
-        .send({ value: 10 })
-        .expect(400)
-        .then(({ body }) => {
-          expect(body.msg).to.equal("bad request");
-        });
-    });
-    it("(4iv) ERROR / STATUS 400 - produces an error as property is missing - bad request", () => {
-      return request(app)
-        .patch("/api/articles/1")
-        .send({ parmater: "", value: 10 })
-        .expect(400)
-        .then(({ body }) => {
-          expect(body.msg).to.equal("bad request");
-        });
+    describe("PATCH - /ARTICLES/:ARTICLE-ID", () => {
+      it("(4a) PATCH / STATUS 200 - adds a key value inc_votes which will have the property indicating how much the votes should be updated by", () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({ parameter: "votes", value: 10 })
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles[0]).to.be.an("object");
+          });
+      });
+      it("(4b) PATCH / STATUS 200 - adds a value of 10 to the current vote count", () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({ parameter: "votes", value: 10 })
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles[0].votes).to.equal(110);
+          });
+      });
+      it("(4i) ERROR / STATUS 404 - produces an error as no article, not found", () => {
+        return request(app)
+          .patch("/api/articles/1000")
+          .send({ parameter: "votes", value: 10 })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("article not found");
+          });
+      });
+      it("(4ii) ERROR / STATUS 400 - produces an error as article in wrong format, bad request", () => {
+        return request(app)
+          .patch("/api/articles/badrequest")
+          .send({ parameter: "votes", value: 10 })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("bad request");
+          });
+      });
+      it("(4iii) ERROR / STATUS 400 - produces an error as key is missing, bad request ", () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({ value: 10 })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("bad request");
+          });
+      });
+      it("(4iv) ERROR / STATUS 400 - produces an error as property is missing - bad request", () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({ parmater: "", value: 10 })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("bad request");
+          });
+      });
     });
     it("(5a) POST / STATUS 200 - expect to return an object", () => {
       return request(app)
@@ -248,6 +256,7 @@ describe("the api router --> /api", () => {
           expect(body.msg).to.equal("not found");
         });
       // NEED TO COMPLETE
+      // use if statement using the viewAllArticleObjects function called with the invalid article id
     });
     it("(5v) ERROR / STATUS 400 - produces an error as article id entered in incorrect format, bad request ", () => {
       return request(app)
@@ -272,7 +281,7 @@ describe("the api router --> /api", () => {
           );
         });
     });
-    it("(6b) GET / STATUS 200 - adds a sort_by query which sorts created_at", () => {
+    it("(6b) GET / STATUS 200 - adds a sort_by query which sorts created_at, as the default value", () => {
       return request(app)
         .get("/api/articles/1/comments?sort_by=created_at")
         .expect(200)
@@ -332,31 +341,119 @@ describe("the api router --> /api", () => {
           expect(body.msg).to.equal("bad request");
         });
     });
-    it("(6iv) ERROR / STATUS 400 - produces an error as order value is incorrect, bad request", () => {
-      return request(app)
-        .get("/api/articles/1/comments?order=hello")
-        .expect(200)
-        .then(({ body }) => {
-          expect(body.msg).to.equal("bad request");
-        });
-      //NEED TO FIX
-    });
-    it("(7a) GET / STATUS 200 / checks if there is an array of comments containing an object with specific key values", () => {
-      return request(app)
-        .get("/api/articles")
-        .expect(200)
-        .then(({ body }) => {
-          expect(body.articles).to.be.an("array");
-          expect(body.articles[0]).to.be.an("object");
-        });
-    });
-    it("(7b) GET / STATUS 200 / adds a sort_by query which sorts comments by any valid column", () => {
-      return request(app)
-        .get("/api/articles?sort_by=topic")
-        .expect(200)
-        .then(({ body }) => {
-          expect(body.articles).to.be.descendingBy("topic");
-        });
+    // it("(6iv) ERROR / STATUS 400 - produces an error as order value is incorrect, bad request", () => {
+    //   return request(app)
+    //     .get("/api/articles/1/comments?order=hello")
+    //     .expect(400)
+    //     .then(({ body }) => {
+    //       expect(body.msg).to.equal("bad request");
+    //     });
+    //   //NEED TO FIX
+    // });
+    describe("GET ALL / ARTICLES", () => {
+      it("(7a) GET / STATUS 200 / checks if there is an array of comments containing an object with specific key values", () => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).to.be.an("array");
+            expect(body.articles[0]).to.be.an("object");
+          });
+      });
+      it("(7b) GET / STATUS 200 / adds a sort_by query which sorts by created_at, as the default value", () => {
+        return request(app)
+          .get("/api/articles?sort_by=created_at")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).to.be.descendingBy("created_at");
+          });
+      });
+      it("(7c) GET / STATUS 200 / adds a sort_by query which sorts comments by any valid column", () => {
+        return request(app)
+          .get("/api/articles?sort_by=votes")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).to.be.descendingBy("votes");
+          });
+      });
+      it("(7d) GET / STATUS 200 / adds an order query which allows columns to be sorted ascendingly or descendingly", () => {
+        return request(app)
+          .get("/api/articles?order=asc")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).to.be.sortedBy("created_at", {
+              ascending: true
+            });
+          });
+      });
+      it("(7e) GET / STATUS 200 - query order defaults to descending", () => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).to.be.descendingBy("created_at", {
+              descending: true
+            });
+          });
+      });
+      it("(7f) GET / STATUS 200 - filters the articles by a username value specified in query", () => {
+        return request(app)
+          .get("/api/articles?author=rogersop")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles.every(article => article.author === "rogersop")).to
+              .be.true;
+          });
+      });
+      it("(7g) GET / STATUS 200 - filters the articles by a topic value specified in query", () => {
+        return request(app)
+          .get("/api/articles?topic=mitch")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles.every(article => article.topic === "mitch")).to.be
+              .true;
+          });
+      });
+      it("(7i) ERROR / STATUS 404 - produces an error for a bad route, not found", () => {
+        return request(app)
+          .get("/api/article")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("route not found");
+          });
+      });
+      it("(7ii) ERROR / STATUS 400 - produces an error as sort_by column does not exist, bad request", () => {
+        return request(app)
+          .get("/api/articles?sort_by=hello")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("bad request");
+          });
+      });
+      // it("(7ii) ERROR / STATUS 400 - produces an error as order value is incorrect, bad request", () => {
+      //   return request(app)
+      //     .get("/api/articles?order=hello")
+      //     .expect(400)
+      //     .then(({ body }) => {
+      //       expect(body.msg).to.equal("bad request");
+      //     });
+      // });
+      it("(7iii) ERROR / STATUS 400 - produces an error an author is not in the database", () => {
+        return request(app)
+          .get("/api/articles?author=hello")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("not found");
+          });
+      });
+      it("(7iv) ERROR / STATUS 400 - produces an error a topic is not in the database", () => {
+        return request(app)
+          .get("/api/articles?topic=hello")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).to.equal("not found");
+          });
+      });
     });
   });
 });
@@ -364,3 +461,13 @@ describe("the api router --> /api", () => {
 //do I need a bad path error for each test - api/article instead of api/articles
 //different test for is it an object/array/key values
 //help with the author/topic query
+
+//TO DO
+
+//2 errors not complete
+//adding describe block for each request
+//PATCH ERRORS -PATCH /api/articles/:article_id
+// No inc_votes on request body
+// Invalid inc_votes (e.g. { inc_votes : "cat" })
+// Some other property on request body (e.g. { inc_votes : 1, name: 'Mitch' })
+//look at the query order - if it's not desc/asc
