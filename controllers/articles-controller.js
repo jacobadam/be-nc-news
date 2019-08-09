@@ -4,7 +4,7 @@ const {
   insertComment,
   viewAllCommentsById,
   viewAllArticles
-} = require("../models/articles-models");
+} = require("../models/articles-model");
 
 exports.getAllArticleObjects = (req, res, next) => {
   viewAllArticleObjects(req.params)
@@ -27,7 +27,8 @@ exports.patchIncVoteById = (req, res, next) => {
 exports.postComment = (req, res, next) => {
   const { article_id } = req.params;
   const { username, body } = req.body;
-  insertComment({ article_id, author: username, body: body })
+  viewAllArticleObjects({article_id})
+    .then(() => insertComment({ article_id, author: username, body: body }))
     .then(comment => {
       res.status(201).send({ comment });
     })

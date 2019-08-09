@@ -1,4 +1,4 @@
-const { viewAllTopicObjects } = require("../models/topics-models");
+const { viewAllTopicObjects } = require("../models/topics-model");
 
 exports.getTopicObjects = (req, res, next) => {
   viewAllTopicObjects(req.query)
@@ -7,5 +7,3 @@ exports.getTopicObjects = (req, res, next) => {
     })
     .catch(next);
 };
-
-// req.params to find out what :ID is sent by the router

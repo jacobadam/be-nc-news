@@ -4,7 +4,8 @@ app.use(express.json());
 const {
   handleCustomErrors,
   handlePsqlErrors,
-  handleServerErrors
+  handleServerErrors,
+  send405Error
 } = require("./errors/errors");
 const apiRouter = require("./routers/api-router");
 
@@ -19,5 +20,6 @@ app.all("/*", (req, res, next) => {
 app.use(handleCustomErrors);
 app.use(handlePsqlErrors);
 app.use(handleServerErrors);
+app.use(send405Error);
 
 module.exports = app;
