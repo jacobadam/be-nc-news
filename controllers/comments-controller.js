@@ -4,11 +4,9 @@ const {
 } = require("../models/comments-model");
 
 exports.patchIncVoteByCommentId = (req, res, next) => {
-  const { parameter, value } = req.body;
-  const { comment_id } = req.params;
-  updateCommentsVote(comment_id, parameter, value)
-    .then(comments => {
-      res.status(200).send({ comments });
+  updateCommentsVote(req.params, req.body)
+    .then(([comment]) => {
+      res.status(200).send({ comment });
     })
     .catch(next);
 };

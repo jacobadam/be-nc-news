@@ -6,7 +6,7 @@ exports.handleCustomErrors = (err, req, res, next) => {
   }
 };
 exports.handlePsqlErrors = (err, req, res, next) => {
-  if ("42703" || "22P02" || "23503") {
+  if (err.status === "42703" || "22P02" || "23503") {
     res.status(400).send({ msg: "bad request" });
   } else {
     next(err);

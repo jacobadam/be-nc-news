@@ -5,11 +5,11 @@ exports.viewAllUserObjects = ({ username }) => {
     .where("username", username)
     .select("*")
     .from("users")
-    .then(response => {
-      if (!response.length) {
+    .then(users => {
+      if (!users.length) {
         return Promise.reject({ status: 404, msg: "username not found" });
       } else {
-        return response;
+        return users;
       }
     });
 };

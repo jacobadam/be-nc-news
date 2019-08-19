@@ -9,14 +9,14 @@ const { formatDates, formatComments, makeRefObj } = require("../utils/utils");
 
 exports.seed = function(knex) {
   return knex.migrate
-    .rollback() // drops tables
-    .then(() => knex.migrate.latest()) // builds tables back again
+    .rollback()
+    .then(() => knex.migrate.latest())
     .then(() => {
       const topicsInsertions = knex("topics").insert(topicData);
       const usersInsertions = knex("users").insert(userData);
       return Promise.all([topicsInsertions, usersInsertions]);
     })
-    .then(insertedData => {
+    .then(() => {
       const updatedArticleData = formatDates(articleData);
       return knex("articles")
         .insert(updatedArticleData)

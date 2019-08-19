@@ -1,15 +1,15 @@
 const connection = require("../db/connection");
 
-exports.updateCommentsVote = (comment_id, parameter, value) => {
+exports.updateCommentsVote = ({comment_id}, {inc_votes = 0}) => {
   return connection("comments")
     .where("comment_id", "=", comment_id)
-    .increment(parameter, value)
+    .increment('votes', inc_votes)
     .returning("*")
-    .then(response => {
-      if (!response.length) {
+    .then(comment => {
+      if (!comment.length) {
         return Promise.reject({ status: 404, msg: "comment not found" });
       } else {
-        return response;
+        return comment;
       }
     });
 };
@@ -17,9 +17,11 @@ exports.removeCommentById = comment_id => {
   return connection("comments")
     .where("comment_id", "=", comment_id)
     .del()
-    .then(response => {
-      if (response <= 0) {
+    .then(comment => {
+      if (comment <= 0) {
         return Promise.reject({ status: 404, msg: "comment not found" });
+      } else if (comment > 0) {
+        return { msg: "deleted count" };
       }
     });
 };
