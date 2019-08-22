@@ -14,6 +14,14 @@ describe("API ROUTER ", () => {
   after(() => {
     return connection.destroy();
   });
+  it("(i) ERROR / 405 - produces an error for invalid method", () => {
+    return request(app)
+      .delete("/api")
+      .expect(405)
+      .then(({ body }) => {
+        expect(body.msg).to.equal("method not allowed");
+      });
+  });
   describe("topics router", () => {
     describe("GET ALL - /TOPICS", () => {
       it("(1a) GET ALL / STATUS CODE 200 - checks if there is an array of topic objects", () => {
@@ -88,9 +96,8 @@ describe("API ROUTER ", () => {
           .get("/api/articles/1")
           .expect(200)
           .then(({ body }) => {
-            expect(body.articles).to.be.an("array");
-            expect(body.articles[0]).to.be.an("object");
-            expect(body.articles[0]).to.contain.keys(
+            expect(body.article).to.be.an("object");
+            expect(body.article).to.contain.keys(
               "title",
               "votes",
               "body",
@@ -107,18 +114,16 @@ describe("API ROUTER ", () => {
           .get("/api/articles/1")
           .expect(200)
           .then(({ body }) => {
-            expect(body.articles).to.eql([
-              {
-                article_id: 1,
-                title: "Living in the shadow of a great man",
-                body: "I find this existence challenging",
-                votes: 100,
-                topic: "mitch",
-                author: "butter_bridge",
-                created_at: "2018-11-15T12:21:54.171Z",
-                comment_count: 13
-              }
-            ]);
+            expect(body.article).to.eql({
+              article_id: 1,
+              title: "Living in the shadow of a great man",
+              body: "I find this existence challenging",
+              votes: 100,
+              topic: "mitch",
+              author: "butter_bridge",
+              created_at: "2018-11-15T12:21:54.171Z",
+              comment_count: 13
+            });
           });
       });
       it("(3i) ERROR / 404 - produces an error as no article found, not found", () => {
@@ -153,7 +158,7 @@ describe("API ROUTER ", () => {
           .send({ inc_votes: 10 })
           .expect(200)
           .then(({ body }) => {
-            expect(body.articles).to.be.an("object");
+            expect(body.article).to.be.an("object");
           });
       });
       it("(4b) PATCH / STATUS 200 - adds a value of 10 to the current vote count", () => {
@@ -162,7 +167,7 @@ describe("API ROUTER ", () => {
           .send({ inc_votes: 10 })
           .expect(200)
           .then(({ body }) => {
-            expect(body.articles.votes).to.equal(110);
+            expect(body.article.votes).to.equal(110);
           });
       });
       it("(4c) PATCH / STATUS 200 - inv_votes key defaults to 0 if no value is specified, therefore current vote count remains the same", () => {
@@ -171,7 +176,7 @@ describe("API ROUTER ", () => {
           .send({})
           .expect(200)
           .then(({ body }) => {
-            expect(body.articles.votes).to.equal(100);
+            expect(body.article.votes).to.equal(100);
           });
       });
       it("(4i) ERROR / STATUS 404 - produces an error as no article, not found", () => {
@@ -289,7 +294,7 @@ describe("API ROUTER ", () => {
           .send({
             username: "butter_bridge",
             body:
-              "'The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky."
+              "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky."
           })
           .expect(404)
           .then(({ body }) => {
@@ -299,7 +304,11 @@ describe("API ROUTER ", () => {
       it("(5v) ERROR / STATUS 400 - produces an error as article id entered in incorrect format, bad request ", () => {
         return request(app)
           .post("/api/articles/hello/comments")
-          .send({ username: "jacob", body: "I am queens BLVD" })
+          .send({
+            username: "butter_bridge",
+            body:
+              "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky."
+          })
           .expect(400)
           .then(({ body }) => {
             expect(body.msg).to.equal("bad request");
@@ -357,6 +366,14 @@ describe("API ROUTER ", () => {
             expect(body.comments).to.be.descendingBy("created_at", {
               descending: true
             });
+          });
+      });
+      it("(6f) GET / STATUS 200 - returns an empty array if existing article contains no comments", () => {
+        return request(app)
+          .get("/api/articles/2/comments")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.comments).to.eql([]);
           });
       });
       it("(6i) ERROR / STATUS 404 - produces an error as article id does not exist, not found", () => {

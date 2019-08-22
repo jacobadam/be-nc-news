@@ -21,7 +21,7 @@ exports.viewAnArticleObjectById = ({ article_id }) => {
     });
 };
 
-exports.updateArticleVote = ({article_id}, {inc_votes = 0}) => {
+exports.updateArticleVote = ({ article_id }, { inc_votes = 0 }) => {
   return connection("articles")
     .where("article_id", "=", article_id)
     .increment("votes", inc_votes)
@@ -48,21 +48,31 @@ exports.insertComment = (article_id, username, body) => {
     });
 };
 
-exports.viewAllCommentsById = (article_id, { sort_by, order = 'desc' }) => {
+exports.viewAllCommentsById = (article_id, { sort_by, order = "desc" }) => {
   return connection
     .select("*")
     .from("comments")
     .where("article_id", "=", article_id)
-    .orderBy(sort_by || "created_at", order )
+    .orderBy(sort_by || "created_at", order)
     .then(comments => {
       if (!["asc", "desc"].includes(order)) {
         return Promise.reject({ status: 400, msg: "order input not valid" });
       }
-      if (!comments.length) {
-        return Promise.reject({ status: 404, msg: "article not found" });
-      } else {
-        return comments;
-      }
+      if (comments.length === 0) {
+        const articleCheck = exports.viewAnArticleObjectById({ article_id });
+        return Promise.all([articleCheck, comments]).then(
+          ([articleCheckRes]) => {
+            if (articleCheckRes[0].comment_count === 0) {
+              return [];
+            } else {
+              return Promise.reject({
+                status: 404,
+                msg: "article not found"
+              });
+            }
+          }
+        );
+      } else return comments;
     });
 };
 

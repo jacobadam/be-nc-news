@@ -8,16 +8,16 @@ const {
 
 exports.getAnArticleObject = (req, res, next) => {
   viewAnArticleObjectById(req.params)
-    .then(articles => {
-      res.status(200).send({ articles });
+    .then(([article]) => {
+      res.status(200).send({ article });
     })
     .catch(next);
 };
 
 exports.patchIncVoteById = (req, res, next) => {
   updateArticleVote(req.params, req.body)
-    .then(([articles]) => {
-      res.status(200).send({ articles });
+    .then(([article]) => {
+      res.status(200).send({ article });
     })
     .catch(next);
 };
