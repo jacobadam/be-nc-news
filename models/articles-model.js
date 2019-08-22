@@ -9,14 +9,14 @@ exports.viewAnArticleObjectById = ({ article_id }) => {
     .where("articles.article_id", "=", article_id)
     .groupBy("articles.article_id")
     .then(article => {
-      article.map(comment => {
-        comment.comment_count = Number(comment.comment_count);
-        return comment;
+      const parsedArticle = article.map(articleData => {
+        const { comment_count, ...restOfData } = articleData;
+        return { ...restOfData, comment_count: Number(comment_count) };
       });
-      if (!article.length) {
+      if (!parsedArticle.length) {
         return Promise.reject({ status: 404, msg: "article not found" });
       } else {
-        return article;
+        return parsedArticle;
       }
     });
 };
